@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - main
+
+env:
+  AUTO_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+  AUTO_COMMITTER_NAME: github-actions[bot]
+  # CNAME: example.com
+  COMMIT_MESSAGE: Deploy ${{ github.sha }}
+  DIST_DIR: ./dist
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PAGES_BRANCH: gh-pages
+  REPO: https://x-access-toke:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build
+
+    - name: Deploy
+      shell: bash -eux {0}
+      run: |
+        if [[ "$DIST_DIR" != /* ]]; then
+          DIST_DIR=$GITHUB_WORKSPACE/$DIST_DIR
+        fi
+        WORKSPACE=$HOME/deploy-${{ github.sha }}
+        mkdir -p $WORKSPACE/repo
+        cd $WORKSPACE/repo
+        if ! git clone $REPO --branch $PAGES_BRANCH --depth 1 --single-branch .; then
+          git clone $REPO --depth 1 --single-branch .
+          git switch --orphan $PAGES_BRANCH
+        fi
+        git rm -r --ignore-unmatch "*"
+        cp -r $DIST_DIR/. .
+        if [ "$CNAME" != "" ]; then echo $CNAME > ./CNAME; fi
+        git add .
+        git config user.email $AUTO_COMMITTER_EMAIL
+        git config user.name $AUTO_COMMITTER_NAME
+        if git commit -m "$COMMIT_MESSAGE"; then
+          git push origin $PAGES_BRANCH
+        else
+          echo "No changes added to commit"
+        fi
