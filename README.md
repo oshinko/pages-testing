@@ -1,10 +1,14 @@
 # Pages Testing
 
-## 準備
+## Dependencies
 
 ```sh
-npm install nunjucks webpack webpack-cli yaml
+npm install chokidar-cli nunjucks webpack webpack-cli yaml
+```
 
-# npm install webpack-dev-server
-# npm install concurrently
+## Quickstart
+
+```sh
+npm install
+npm run watch
 ```
