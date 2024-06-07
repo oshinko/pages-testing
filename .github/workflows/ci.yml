@@ -5,22 +5,9 @@ on:
     branches:
     - main
 
-env:
-  AUTO_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
-  AUTO_COMMITTER_NAME: github-actions[bot]
-  # CNAME: example.com
-  COMMIT_MESSAGE: Deploy ${{ github.sha }}
-  DIST_DIR: ./dist
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  PAGES_BRANCH: gh-pages
-  REPO: https://x-access-toke:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
 
     steps:
     - uses: actions/checkout@v4
@@ -34,27 +21,27 @@ jobs:
     - name: Build
       run: npm run build
 
-    - name: Deploy
-      shell: bash -eux {0}
-      run: |
-        if [[ "$DIST_DIR" != /* ]]; then
-          DIST_DIR=$GITHUB_WORKSPACE/$DIST_DIR
-        fi
-        WORKSPACE=$HOME/deploy-${{ github.sha }}
-        mkdir -p $WORKSPACE/repo
-        cd $WORKSPACE/repo
-        if ! git clone $REPO --branch $PAGES_BRANCH --depth 1 --single-branch .; then
-          git clone $REPO --depth 1 --single-branch .
-          git switch --orphan $PAGES_BRANCH
-        fi
-        git rm -r --ignore-unmatch "*"
-        cp -r $DIST_DIR/. .
-        if [ -v CNAME ]; then echo $CNAME > ./CNAME; fi
-        git add .
-        git config user.email $AUTO_COMMITTER_EMAIL
-        git config user.name $AUTO_COMMITTER_NAME
-        if git commit -m "$COMMIT_MESSAGE"; then
-          git push origin $PAGES_BRANCH
-        else
-          echo "No changes added to commit"
-        fi
+    - uses: actions/upload-pages-artifact@v3
+      with:
+        path: dist
+
+  deploy:
+    # Add a dependency to the build job
+    needs: build
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # or specific "vX.X.X" version tag for this action
