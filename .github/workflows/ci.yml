@@ -49,7 +49,7 @@ jobs:
         fi
         git rm -r --ignore-unmatch "*"
         cp -r $DIST_DIR/. .
-        if [ "$CNAME" != "" ]; then echo $CNAME > ./CNAME; fi
+        if [ -v CNAME ]; then echo $CNAME > ./CNAME; fi
         git add .
         git config user.email $AUTO_COMMITTER_EMAIL
         git config user.name $AUTO_COMMITTER_NAME
