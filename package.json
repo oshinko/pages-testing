@@ -1,4 +1,9 @@
 {
+  "name": "pages-testing.osync.io",
+  "version": "0.0.0",
+  "description": "Testing of GitHubPages",
+  "author": "Oshinko <osnk@osync.io>",
+  "private": true,
   "dependencies": {
     "chokidar-cli": "^3.0.0",
     "concurrently": "^8.2.2",
