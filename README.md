@@ -3,8 +3,7 @@
 ## 準備
 
 ```sh
-npm install webpack
-npm install nunjucks
+npm install nunjucks webpack webpack-cli yaml
 
 # npm install webpack-dev-server
 # npm install concurrently

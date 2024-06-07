@@ -1,28 +1,21 @@
+const CopyPlugin = require('./plugins/CopyPlugin');
+const GenerateHtmlPlugin = require('./plugins/GenerateHtmlPlugin');
+const YAML = require('yaml');
+const fs = require('fs');
 const path = require('path');
 
+const src = path.resolve(__dirname, 'src');
+const dist = path.resolve(__dirname, 'dist');
+
+const data =
+  YAML.parse(fs.readFileSync(path.resolve(__dirname, 'data.yml'), 'utf8'));
+
 module.exports = {
-  entry: './src/app.js',
-  output: {
-    filename: 'bundle.js',
-    path: path.join(__dirname, 'dist/assets/js'),
-    publicPath: '',
-  },
-  performance: {
-    hints: false,
-  },
-  cache: {
-    type: 'filesystem',
-    buildDependencies: {
-      config: [__filename]
-    }
-  },
-  resolve: {
-    modules: [path.resolve(__dirname, './'), 'node_modules'],
-    extensions: ['.js'],
-    alias: {
-      '@': path.resolve(__dirname, './src')
-    },
-  },
-  mode: 'production',
-  devtool: false
-}
+  entry: `${src}/index.js`,
+  output: { filename: 'bundle.js', path: `${dist}/js` },
+  plugins: [
+    new CopyPlugin({ src: `${src}/static`, dist: dist }),
+    new GenerateHtmlPlugin({ src: `${src}/pages`, dist, data })
+  ],
+  mode: 'production'
+};
