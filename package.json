@@ -14,8 +14,8 @@
     "clean": "node -e \"const fs = require('fs'); const path = require('path'); const dir = 'dist'; if (!fs.existsSync(dir)) process.exit(0); fs.readdirSync(dir).forEach(file => { const filePath = path.join(dir, file); fs.statSync(filePath).isDirectory() ? fs.rmSync(filePath, { recursive: true }) : fs.unlinkSync(filePath); }); console.log('Cleared dist directory');\"",
     "clean:build": "npm run clean && npm run build",
     "clean:build:dev": "npm run clean && npm run build:dev",
-    "serve:dev": "webpack server --config webpack.config.js --env development",
-    "watch": "concurrently \"npm run clean:build:dev -- --watch\" \"npm run serve:dev\" \"npm run watch:build\"",
-    "watch:build": "chokidar \"src/**\" --command \"npm run build:dev\""
+    "serve": "concurrently \"npm run clean:build:dev -- --watch\" \"npm run _serve:dev\" \"npm run _watch:dev\"",
+    "_serve:dev": "webpack server --config webpack.config.js --env development",
+    "_watch:dev": "chokidar \"src/**\" --command \"npm run build:dev\""
   }
 }
