@@ -12,5 +12,5 @@ npm install chokidar-cli nunjucks webpack webpack-cli yaml
 
 ```sh
 npm install
-npm run watch
+npm run serve
 ```
